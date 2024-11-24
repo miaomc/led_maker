@@ -1,5 +1,5 @@
-import main_frame
+import mainframe
 
 
 if __name__ == '__main__':
-    main_frame.main()
+    mainframe.main()
