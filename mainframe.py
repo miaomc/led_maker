@@ -8,7 +8,7 @@ import calc
 
 originFileName = 'LED_template.xlsx'
 dataFileName = 'data.xlsx'
-TITLE=u'一键LED配单生成工具V20241123'
+TITLE=u'一键LED配单生成工具V20241125'
 
 makingTimes = 0
 
@@ -47,7 +47,7 @@ def main():
         itemDict[i] = content
         content.grid(row=n,column=1)    
     
-    itemDict['XIANGMUMINGCHENG'].insert(0,'LED显示大屏清单-宇视'+datetime.now().strftime('%Y%m%d%H%M%S'))
+    itemDict['XIANGMUMINGCHENG'].insert(0,'LED显示大屏清单-宇视'+datetime.now().strftime('%Y%m%d'))
 
     # 处理函数
     def doReplace():
@@ -121,7 +121,7 @@ def main():
 
         #print(r)
         # 生成Excel文件
-        newFileName = itemDict['XIANGMUMINGCHENG'].get()+str(makingTimes)+'.xlsx'
+        newFileName = itemDict['XIANGMUMINGCHENG'].get()+'_'+str(makingTimes)+'_'+str(r["SHIJI_CHANG"])+'x'+str(r["SHIJI_GAO"])+'.xlsx'
         excel.copyExcel(originFileName, newFileName, replaceDict)
 
         label = tk.Label(mainframe,text='      '+str(makingTimes)+'  ok.     ').grid(row=len(showDict.keys())*2+2,sticky=tk.W)#靠右
