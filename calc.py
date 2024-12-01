@@ -58,16 +58,16 @@ def calcJieShouKa(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
     return zuizhong_chang,zuizhong_gao,zuizhong_jiage,zuizhong_xinghao
 
 
-def calcChuLiQi(keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
+def calcChuLiQi(chuliqi,keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
     #gonglv=gonglv*1.3 # 向上抛30%
     zuizhong_key = ""
     zuizhong_jiage = 0
     for i in keyList:
         #print(detailDict[i])
-        if detailDict[i]["LEDCHULIQI_DAIZAI"]>fenbianlv_chang*fenbianlv_gao:
-            if detailDict[i]["LEDCHULIQI_DANJIA"]<zuizhong_jiage or zuizhong_jiage==0:
+        if detailDict[i][chuliqi+"_DAIZAI"]>fenbianlv_chang*fenbianlv_gao:
+            if detailDict[i][chuliqi+"_DANJIA"]<zuizhong_jiage or zuizhong_jiage==0:
                 zuizhong_key = i
-                zuizhong_jiage = detailDict[i]["LEDCHULIQI_DANJIA"]
+                zuizhong_jiage = detailDict[i][chuliqi+"_DANJIA"]
 
     return zuizhong_key,zuizhong_jiage
 

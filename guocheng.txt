@@ -1,0 +1,2 @@
+pip install PyInstaller -i https://mirrors.aliyun.com/pypi/simple/     
+pyinstaller -F main.py --noconsole
