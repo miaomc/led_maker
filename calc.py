@@ -59,7 +59,7 @@ def calcJieShouKa(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
 
 
 def calcChuLiQi(chuliqi,keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
-    #gonglv=gonglv*1.3 # 向上抛30%
+
     zuizhong_key = ""
     zuizhong_jiage = 0
     for i in keyList:
@@ -68,8 +68,23 @@ def calcChuLiQi(chuliqi,keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
             if detailDict[i][chuliqi+"_DANJIA"]<zuizhong_jiage or zuizhong_jiage==0:
                 zuizhong_key = i
                 zuizhong_jiage = detailDict[i][chuliqi+"_DANJIA"]
+        
+    return zuizhong_key
 
-    return zuizhong_key,zuizhong_jiage
+
+def calcFaSongKa(fasongka,keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
+    zuizhong_key = None
+    zuizhong_shuliang = 0
+    zuizhong_jiage = 0
+    for i in keyList:
+        shuliang = fenbianlv_chang*fenbianlv_gao / detailDict[i][fasongka+"_DAIZAI"] # ！！！这个计算过程太粗略，有问题，实际上是按长和高带多少数量计算的
+        shuliang = roundup(shuliang)
+        if shuliang*detailDict[i][fasongka+"_DANJIA"]<zuizhong_jiage or zuizhong_jiage==0:
+            zuizhong_shuliang = shuliang
+            zuizhong_jiage = shuliang*detailDict[i][fasongka+"_DANJIA"]
+            zuizhong_key = i
+
+    return zuizhong_key, zuizhong_shuliang
 
             
 def calcPeiDianXiang(keyList,detailDict,gonglv):

@@ -9,7 +9,7 @@ import calc
 
 originFileName = 'LED_template.xlsx'
 dataFileName = 'data.xlsx'
-TITLE=u'一键LED配单生成工具V20241201'
+TITLE=u'一键LED配单生成工具V20241211'
 
 makingTimes = 0
 
@@ -127,16 +127,25 @@ def main():
                 for j in ["MINGCHENG","XINGHAO","CANSHU","DANJIA"]:
                     r["JIESHOUKA_"+j] = detailDict[i][jieshouka+"_"+j]
 
-        # 计算处理器
+        # 计算处理器 或者 发送卡
         if itemDict['SHOUFALEIBIE'].get() == 0:
             chuliqi = "LEDCHULIQI-LC"
         else:
             chuliqi = "LEDCHULIQI-LN"
-        key, r["LEDCHULIQI_JIAGE"] = calc.calcChuLiQi(chuliqi,keyDict[chuliqi],detailDict,r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"])
-        if key:
+        key = calc.calcChuLiQi(chuliqi,keyDict[chuliqi],detailDict,r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"])
+        if key:  # 如果处理器能带的动
             r["LEDCHULIQI_SHULIANG"] = 1
-        for i in ["MINGCHENG","XINGHAO","CANSHU","DANJIA"]:
-            r["LEDCHULIQI_"+i] = detailDict[key][chuliqi+"_"+i]
+            for i in ["MINGCHENG","XINGHAO","CANSHU","DANJIA"]:
+                r["LEDCHULIQI_"+i] = detailDict[key][chuliqi+"_"+i]
+        else:  # key为空，就是处理器超载了，需要计算发送卡
+            if itemDict['SHOUFALEIBIE'].get() == 0:
+                fasongka = "FASONGKA-LC"
+            else:
+                fasongka = "FASONGKA-LN"
+            key, shuliang = calc.calcFaSongKa(fasongka,keyDict[fasongka],detailDict,r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"])
+            r["LEDCHULIQI_SHULIANG"] = shuliang
+            for i in ["MINGCHENG","XINGHAO","CANSHU","DANJIA"]:
+                r["LEDCHULIQI_"+i] = detailDict[key][fasongka+"_"+i]                
 
         # 计算配电箱
         key, r["PEIDIANXIANG_JIAGE"] = calc.calcPeiDianXiang(keyDict["PEIDIANXIANG"],detailDict,r["PINGMUZONGGONGLV"])
