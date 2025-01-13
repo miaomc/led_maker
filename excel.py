@@ -5,15 +5,18 @@ import shutil
 import PIL
 
 
-def copyExcel(originFileName, newFileName, replaceDict):
+def copyExcel(originFileName, newFileName, replaceDict, sheetName):
     # 复制源文件
     shutil.copy(originFileName, newFileName)
 
     # 替换文件
     wb = openpyxl.load_workbook(newFileName)
 
-    for sheetname in wb.sheetnames:
+    for sheetname in wb.sheetnames:        
         sheet = wb[sheetname]
+        if sheetname != sheetName:
+            wb.remove(sheet)
+            continue
 
         for row in sheet.iter_rows():
             for cell in row:
