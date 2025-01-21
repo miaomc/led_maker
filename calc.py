@@ -1,3 +1,4 @@
+# -*- coding: cp936 -*-
 import json
 
 
@@ -9,8 +10,8 @@ def roundup(i):
     
 
 def calcBanZi(chang=1, gao=1, chicun=[320,160]):
-    banzi_chang = int(chang*1000 / chicun[0])
-    banzi_gao = int(gao*1000 / chicun[1])
+    banzi_chang = round(chang*1000 / chicun[0])
+    banzi_gao = round(gao*1000 / chicun[1])
     return banzi_chang,banzi_gao
 
 
@@ -30,8 +31,8 @@ def calcJieShouKa(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
     12 12
     [['LN-DH7508-S', 76], ['LN-DH7512-S', 87], ['LN-DH7516-S', 99]]
     SHINEILED
-    {'SHINEILED_XINGHAO': 'MW-M12-RB', 'SHINEILED_MINGCHENG': '1.25mmé—´è·LEDæ˜¾ç¤ºæ¨¡ç»„',
-    'SHINEILED_CANSHU': 'ç‚¹é—´è·:P1.2\nï¼ˆKg/pcsï¼‰:0.45Â±0.1\n', 'SHINEILED_DANJIA': 350,
+    {'SHINEILED_XINGHAO': 'MW-M12-RB', 'SHINEILED_MINGCHENG': '1.25mm¼ä¾àLEDÏÔÊ¾Ä£×é',
+    'SHINEILED_CANSHU': 'µã¼ä¾à:P1.2\n£¨Kg/pcs£©:0.45¡À0.1\n', 'SHINEILED_DANJIA': 350,
     'SHINEILED_FENBIANLV': '256*128', 'SHINEILED_CHICUN': '320*160', 'SHINEILED_GONGLV': 600, 'SHINEILED_LN-DH7508-S': None,
     'SHINEILED_LN-DH7512-S': '[1,8],[2,4]', 'SHINEILED_LN-DH7516-S': None}
     """
@@ -82,21 +83,21 @@ def calcFaSongKa(fasongka,keyList,detailDict,danyuanFBL=[416,312],danyuanCG=[26,
         ZJdaizai=int(detailDict[fsk][fasongka+"_DAIZAI"])
         ZJwangkoushu=int(detailDict[fsk][fasongka+"_WANGKOU"])
         # print(ZJdaizai,ZJwangkoushu)
-        # è®¡ç®—å•ç½‘å£æœ€å¤šå¯ä»¥å¸¦å‡ ä¸ªå•å…ƒ
+        # ¼ÆËãµ¥Íø¿Ú×î¶à¿ÉÒÔ´ø¼¸¸öµ¥Ôª
         dangwangkou_zuiduo = int(DWKdaizai/danyuanFBL_zong)
         #print(dangwangkou_zuiduo)
 
-        # ä»å•ç½‘å£å¸¦æ»¡å¼€å§‹è®¡ç®—
+        # ´Óµ¥Íø¿Ú´øÂú¿ªÊ¼¼ÆËã
         rList = []
         for i in range(dangwangkou_zuiduo,0,-1):
-            # ç”¨æ»¡æ•´æœºå•ç½‘å£å¼€å§‹è®¡ç®—
+            # ÓÃÂúÕû»úµ¥Íø¿Ú¿ªÊ¼¼ÆËã
             for j in range(ZJwangkoushu,0,-1):
                 #print(i,j)
-                # ä¸èƒ½è¶…è¿‡å•æœºæ€»å¸¦è½½,ä¸èƒ½è¶…è¿‡æ‹¼æ§çš„æœ€é•¿å’Œé«˜
+                # ²»ÄÜ³¬¹ıµ¥»ú×Ü´øÔØ,²»ÄÜ³¬¹ıÆ´¿ØµÄ×î³¤ºÍ¸ß
                 if i*j*danyuanFBL_zong > ZJdaizai:
                     continue
                 # print(i,j)
-                # å‡è®¾å•ç½‘å£æ˜¯1xi,æˆ–è€…ix1çš„æ–¹å¼
+                # ¼ÙÉèµ¥Íø¿ÚÊÇ1xi,»òÕßix1µÄ·½Ê½
                 if i*danyuanFBL[0] <= PKzuigaoGC[0] and j*danyuanFBL[1] <= PKzuigaoGC[1]:
                     rList.append([i,j])
                     zuizhong_key=fsk
@@ -104,7 +105,7 @@ def calcFaSongKa(fasongka,keyList,detailDict,danyuanFBL=[416,312],danyuanCG=[26,
                     rList.append([j,i])
                     zuizhong_key=fsk
     
-    # è®¡ç®—éœ€è¦å¤šå°‘å¼ å‘é€å¡
+    # ¼ÆËãĞèÒª¶àÉÙÕÅ·¢ËÍ¿¨
     zuizhong_shuliang = 0
     zuizhongList = []
     for i in rList:
@@ -123,7 +124,7 @@ def calcFaSongKa1(fasongka,keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
     zuizhong_shuliang = 0
     zuizhong_jiage = 0
     for i in keyList:
-        shuliang = fenbianlv_chang*fenbianlv_gao / detailDict[i][fasongka+"_DAIZAI"] # ï¼ï¼ï¼è¿™ä¸ªè®¡ç®—è¿‡ç¨‹å¤ªç²—ç•¥ï¼Œæœ‰é—®é¢˜ï¼Œå®é™…ä¸Šæ˜¯æŒ‰é•¿å’Œé«˜å¸¦å¤šå°‘æ•°é‡è®¡ç®—çš„
+        shuliang = fenbianlv_chang*fenbianlv_gao / detailDict[i][fasongka+"_DAIZAI"] # £¡£¡£¡Õâ¸ö¼ÆËã¹ı³ÌÌ«´ÖÂÔ£¬ÓĞÎÊÌâ£¬Êµ¼ÊÉÏÊÇ°´³¤ºÍ¸ß´ø¶àÉÙÊıÁ¿¼ÆËãµÄ
         shuliang = roundup(shuliang)
         if shuliang*detailDict[i][fasongka+"_DANJIA"]<zuizhong_jiage or zuizhong_jiage==0:
             zuizhong_shuliang = shuliang
@@ -135,16 +136,16 @@ def calcFaSongKa1(fasongka,keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
 
 def calcPingKong(fasongka_shuliang):
     kou8 = roundup(fasongka_shuliang/8)
-    if kou8 <= 3: # å°äºç­‰äº3å¼ 8å£è¾“å‡ºæ¿å¡å°±ç”¨2Uæ‹¼æ§
+    if kou8 <= 3: # Ğ¡ÓÚµÈÓÚ3ÕÅ8¿ÚÊä³ö°å¿¨¾ÍÓÃ2UÆ´¿Ø
         keyU = "2U"
     else:
-        keyU = "3U" # !!!æ²¡æœ‰è€ƒè™‘è¶…è¿‡10å¼ çš„æƒ…å†µ
+        keyU = "3U" # !!!Ã»ÓĞ¿¼ÂÇ³¬¹ı10ÕÅµÄÇé¿ö
 
     return keyU, kou8
 
             
 def calcPeiDianXiang(keyList,detailDict,gonglv):
-    gonglv=gonglv*1.3  # å‘ä¸ŠæŠ›30%
+    gonglv=gonglv*1.3  # ÏòÉÏÅ×30%
     zuizhong_key = ""
     zuizhong_jiage = 0
     for i in keyList:
