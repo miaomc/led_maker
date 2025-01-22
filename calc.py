@@ -41,6 +41,7 @@ def calcJieShouKa(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
     zuizhong_chang=0
     zuizhong_gao=0
     zuizhong_jiage=0
+    zuizhong_l=[]
     for i0 in JieShouKaList:
         #print(i0)
         i = i0[0]
@@ -55,16 +56,17 @@ def calcJieShouKa(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
                     zuizhong_gao = jieshou_gao
                     zuizhong_jiage = jiage
                     zuizhong_xinghao = i0[0]
+                    zuizhong_l = l
 
-    return zuizhong_chang,zuizhong_gao,zuizhong_jiage,zuizhong_xinghao
+    return zuizhong_chang,zuizhong_gao,zuizhong_jiage,zuizhong_xinghao,zuizhong_l
 
 
-def calcChuLiQi(chuliqi,keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
+def calcChuLiQi(chuliqi,keyList,detailDict,fenbianlv_chang,fenbianlv_gao,wangkou_shuliang):
     zuizhong_key = ""
     zuizhong_jiage = 0
     for i in keyList:
         #print(detailDict[i])
-        if detailDict[i][chuliqi+"_DAIZAI"]>fenbianlv_chang*fenbianlv_gao:
+        if detailDict[i][chuliqi+"_DAIZAI"]>fenbianlv_chang*fenbianlv_gao and detailDict[i][chuliqi+"_WANGKOU"]>=wangkou_shuliang:
             if detailDict[i][chuliqi+"_DANJIA"]<zuizhong_jiage or zuizhong_jiage==0:
                 zuizhong_key = i
                 zuizhong_jiage = detailDict[i][chuliqi+"_DANJIA"]
@@ -72,6 +74,16 @@ def calcChuLiQi(chuliqi,keyList,detailDict,fenbianlv_chang,fenbianlv_gao):
     return zuizhong_key
 
 
+def calcFaSongWangKou(danyuanFBL=[416,312],danyuanCG=[26,7],DWKdaizai=650000):
+    danyuanFBL_zong = danyuanFBL[0]*danyuanFBL[1] # 单个单元的分辨率
+    dangwangkou_zuiduo = int(DWKdaizai/danyuanFBL_zong) # 计算单网线可以带几个单元
+
+    if roundup(danyuanCG[0]/dangwangkou_zuiduo)*danyuanCG[1] > roundup(danyuanCG[1]/dangwangkou_zuiduo)*danyuanCG[0]:
+        return roundup(danyuanCG[1]/dangwangkou_zuiduo)*danyuanCG[0]
+    else:
+        return roundup(danyuanCG[0]/dangwangkou_zuiduo)*danyuanCG[1]
+    
+    
 def calcFaSongKa(fasongka,keyList,detailDict,danyuanFBL=[416,312],danyuanCG=[26,7]):
     DWKdaizai=650000
     

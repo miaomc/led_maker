@@ -1,2 +1,31 @@
+# pyinstaller 操作
 pip install PyInstaller -i https://mirrors.aliyun.com/pypi/simple/     
 pyinstaller -F main.py --noconsole
+
+pyinstaller -Dw -i D:\python_source\LED_maker\led.ico main.py
+
+# nuitka 第二次编译 操作
+myenv\Scripts\activate.bat
+python -m nuitka --lto=no --enable-plugin=tk-inter --onefile --standalone --windows-console-mode=disable main.py
+
+#https://blog.csdn.net/llf000000/article/details/135440235
+在使用-F选项时，PyInstaller会将应用程序的所有依赖项打包到一个单独的可执行文件中，使得应用程序更加独立和便携。然而，由于将所有依赖项都包含在一个文件中，这可能会导致生成的可执行文件的大小较大。
+最终我的打包命令是：
+pyinstaller -w --add-data "mmdeploy_ort_net.dll;." -i .\main.ico .\main.py
+
+#https://blog.csdn.net/qq_45429426/article/details/122517143
+Python pyinstaller --splash参数 pyi_splash（闪屏动画） ，缓解Python程序加载缓慢的影响
+
+# nuitka 
+Python——Windows使用Nuitka2.0打包（保姆级教程）
+https://blog.csdn.net/Pan_peter/article/details/136411229
+使用 venv方法（创建虚拟环境）
+python -m venv myenv 
+myenv\Scripts\activate.bat  # 在 Windows 上
+pip install nuitka
+pip install -r requirements.txt # 假设你的所有依赖都列在了 requirements.txt 文件中
+pip install Pillow
+pip install openpyxl
+python main.py
+python -m nuitka --lto=no --onefile --standalone test1.py
+python -m nuitka --lto=no --enable-plugin=tk-inter --onefile --standalone --windows-console-mode=disable main.py
