@@ -30,7 +30,7 @@ def quBaoGao(s):
         else:
             break
 
-    return s[:i_start]+s[i_end+1:]        
+    return s[:i_start]+s[i_end+1:]
 
 
 def combineCanShu(l1,l2,m=10,n=2,nn=1):
@@ -119,6 +119,7 @@ def makeCanShu():
         for n,i in enumerate(canshuList):
             tmp += str(n+1)+'. '+i+'\n'
         swCanShu[(key,xinghao)] = tmp
+        print(xinghao)
         
     # 写入 data.xlsx data SHANGWUCANSHU
     excel.writeInCanShu('data.xlsx','data',swCanShu,'SHANGWUCANSHU2')

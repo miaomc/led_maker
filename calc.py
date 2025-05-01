@@ -56,7 +56,7 @@ def calcJieShouKa(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
                     zuizhong_gao = jieshou_gao
                     zuizhong_jiage = jiage
                     zuizhong_xinghao = i0[0]
-                    zuizhong_l = l
+                    zuizhong_l = (roundup(banzi_chang/jieshou_chang), roundup(banzi_gao/jieshou_gao))
 
     return zuizhong_chang,zuizhong_gao,zuizhong_jiage,zuizhong_xinghao,zuizhong_l
 

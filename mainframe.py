@@ -9,7 +9,7 @@ import calc
 
 originFileName = 'LED_template.xlsx'
 dataFileName = 'data.xlsx'
-TITLE=u'一键LED配单生成工具V3.5-20250122'
+TITLE=u'一键LED配单生成工具V3.6-20250502'
 makingTimes = 0
 newFileName = ""
 doReplaceDict = None
@@ -87,6 +87,7 @@ def main():
         # print(replaceDict)
         
         r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"],r["JIESHOUKA_DAIZAI_CHANGGAO"]=calc.calcJieShouKa(r["BANZI_CHANG"],r["BANZI_GAO"],JieShouKaList,LEDLEIBIE,detailDict[LEDMingCheng])
+        #print(r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"],r["JIESHOUKA_DAIZAI_CHANGGAO"])
         r["JIESHOUKA_SHULIANG"]=r["JIESHOUKA_CHANG"]*r["JIESHOUKA_GAO"]
         # print(r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"])
         for i in keyDict[jieshouka]:
@@ -204,6 +205,7 @@ def main():
         tmpList.append(u"实际宽高: %s * %s = %s 平方米"%(str(r["SHIJI_CHANG"]),str(r["SHIJI_GAO"]),str(r["MIANJI"])))
         tmpList.append(u"总分辨率: %d * %d = %d 像素"%(r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"],r["FENBIANLV_CHANG"]*r["FENBIANLV_GAO"]))
         tmpList.append(u"单元宽高: %s * %s "%(str(r["BANZI_CHANG"]),str(r["BANZI_GAO"])))
+        tmpList.append(u"带载网口数: %d"%(r['FASONGWANGKOU_SHULIANG']))
         tmpList.append(u"%s: %d * %d = %d 张"%(r["JIESHOUKA_MINGCHENG"],r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_SHULIANG"]))
         tmpList.append(u"发送数量：%s"%r["LEDCHULIQI_SHULIANG"])
         
@@ -225,7 +227,7 @@ def main():
         global makingTimes
         # 生成Excel文件
         if makeExcel:
-            newFileName = u'宇视'+itemDict['LED'].get().split(' ')[0]+u'LED大屏'+'('+str(r["SHIJI_CHANG"])+'x'+str(r["SHIJI_GAO"])+u')-'+datetime.now().strftime('%Y%m%d%S')+str(makingTimes)+'.xlsx'
+            newFileName = u'宇视'+itemDict['LED'].get().split(' ')[0]+'('+str(r["SHIJI_CHANG"])+'x'+str(r["SHIJI_GAO"])+u')'+datetime.now().strftime('%Y%m%d%S')+str(makingTimes)+'.xlsx'
             excel.copyExcel(originFileName, newFileName, r, sheetName=sheetName)
             # 计数显示
             
