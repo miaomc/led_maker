@@ -9,7 +9,7 @@ import calc
 
 originFileName = 'LED_template.xlsx'
 dataFileName = 'data.xlsx'
-TITLE=u'一键LED配单生成工具V3.6-20250502'
+TITLE=u'一键LED配单生成工具V3.7-20260409'
 makingTimes = 0
 newFileName = ""
 doReplaceDict = None
@@ -86,18 +86,11 @@ def main():
         # print(JieShouKaList)
         # print(replaceDict)
         
-        r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"],r["JIESHOUKA_DAIZAI_CHANGGAO"]=calc.calcJieShouKa(r["BANZI_CHANG"],r["BANZI_GAO"],JieShouKaList,LEDLEIBIE,detailDict[LEDMingCheng])
-        #print(r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"],r["JIESHOUKA_DAIZAI_CHANGGAO"])
-        r["JIESHOUKA_SHULIANG"]=r["JIESHOUKA_CHANG"]*r["JIESHOUKA_GAO"]
-        # print(r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"])
-        for i in keyDict[jieshouka]:
-            if r["JIESHOUKA_XINGHAO"]  == detailDict[i][jieshouka+"_XINGHAO"]:
-                for j in tihuanList:
-                    if "CANSHU" in j:
-                        tail = "CANSHU"
-                    else:
-                        tail = j                     
-                    r["JIESHOUKA_"+tail] = detailDict[i][jieshouka+"_"+j]
+        #r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"],r["JIESHOUKA_DAIZAI_CHANGGAO"]=calc.calcJieShouKa(r["BANZI_CHANG"],r["BANZI_GAO"],JieShouKaList,LEDLEIBIE,detailDict[LEDMingCheng])
+        jieshouka_list = [] # [[chang,gao,jiage,xinghao,daizai_changgao],...] # 这里的价格=接收卡数量*单价
+        jieshouka_list =calc.calcJieShouKa_List(r["BANZI_CHANG"],r["BANZI_GAO"],JieShouKaList,LEDLEIBIE,detailDict[LEDMingCheng]) # ！这里返回列表，如果是箱体返回为空list
+        #print(jieshouka_list)
+        
 
         # 计算处理器 或者 发送卡
         if itemDict['SHOUFALEIBIE'].get() == 0:
@@ -108,71 +101,174 @@ def main():
             chuliqi = "LEDCHULIQI-KSD"
 
         # 计算发送网口数量
-        if r["JIESHOUKA_XINGHAO"]:
-            danyuan_FBL = [r["JIESHOUKA_DAIZAI_CHANGGAO"][0]*r["MOZU_FENBIANLV_CHANG"],r["JIESHOUKA_DAIZAI_CHANGGAO"][1]*r["MOZU_FENBIANLV_GAO"]]
-            danyuan_CG = [r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"]]
+        if jieshouka_list:
+            # 模组的方案
+            zongjiage = 0
+            #for r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"],r["JIESHOUKA_DAIZAI_CHANGGAO"] in jieshouka_list:
+            for jieshouka_chang,jieshouka_gao,jieshouka_jiage,jieshouka_xinghao,jieshouka_daizai_changgao in jieshouka_list:
+                # 最小单元为单张接收卡带载的范围
+                danyuan_FBL = [jieshouka_daizai_changgao[0]*r["MOZU_FENBIANLV_CHANG"],jieshouka_daizai_changgao[1]*r["MOZU_FENBIANLV_GAO"]]
+                danyuan_CG = [jieshouka_chang,jieshouka_gao]
+                tmp_wangkou_shuliang = calc.calcFaSongWangKou(danyuan_FBL, danyuan_CG)
+                
+                key = calc.calcChuLiQi(chuliqi,keyDict[chuliqi],detailDict,r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"],tmp_wangkou_shuliang)
+                if key: # 如果处理器能带的动
+                    r["LEDCHULIQI_SHULIANG"] = 1
+                    # 总价比较
+                    if zongjiage==0 or detailDict[key][chuliqi+"_DANJIA"]*r["LEDCHULIQI_SHULIANG"]+r["JIESHOUKA_JIAGE"] < zongjiage:                     
+                        r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"],r["JIESHOUKA_DAIZAI_CHANGGAO"]=jieshouka_chang,jieshouka_gao,jieshouka_jiage,jieshouka_xinghao,jieshouka_daizai_changgao
+                        zongjiage = detailDict[key][chuliqi+"_DANJIA"]*r["LEDCHULIQI_SHULIANG"]+r["JIESHOUKA_JIAGE"]
+                        # 写入带载网口数量
+                        r['FASONGWANGKOU_SHULIANG'] = tmp_wangkou_shuliang
+                        # 写入处理提的参数
+                        for i in tihuanList:
+                            if "CANSHU" in i:
+                                tail = "CANSHU"
+                            else:
+                                tail = i                        
+                            r["LEDCHULIQI_"+tail] = detailDict[key][chuliqi+"_"+i]
+                        # 写入接收卡参数
+                        r["JIESHOUKA_SHULIANG"]=r["JIESHOUKA_CHANG"]*r["JIESHOUKA_GAO"]
+                        for i in keyDict[jieshouka]:
+                            if r["JIESHOUKA_XINGHAO"]  == detailDict[i][jieshouka+"_XINGHAO"]:
+                                for j in tihuanList:
+                                    if "CANSHU" in j:
+                                        tail = "CANSHU"
+                                    else:
+                                        tail = j                     
+                                    r["JIESHOUKA_"+tail] = detailDict[i][jieshouka+"_"+j]
+                else: # 处理器带不动，就要用发送板卡形式
+                    # 切换为 LED及拼控 的sheet & 计算拼控
+                    if LEDLEIBIE == "SHINEILED":
+                        sheetName = u"LED及拼控"
+                    elif LEDLEIBIE == "XIANGTILED":
+                        sheetName = u"LED箱体及拼控"
+                        
+                    if itemDict['SHOUFALEIBIE'].get() == 0:
+                        fasongka = "FASONGKA-LC"
+                    elif itemDict['SHOUFALEIBIE'].get() == 1:
+                        fasongka = "FASONGKA-LN"
+                    elif itemDict['SHOUFALEIBIE'].get() == 2:
+                        fasongka = "FASONGKA-KSD"
+                    # 临时计算初始化
+                    tmp_zongjiage = jieshouka_jiage
+                    # 计算发送卡数量
+                    key_fasongka,shuliang,fasongzuwang_list = calc.calcFaSongKa(fasongka,keyDict[fasongka],detailDict,danyuan_FBL,danyuan_CG)
+                    tmp_zongjiage += detailDict[key_fasongka][fasongka+"_DANJIA"]*shuliang 
+                    # 计算拼控数量
+                    keyU, kou8_shuliang = calc.calcPingKong(shuliang)
+                    if keyU == "2U":
+                        key = u"视频拼接处理服务器(2U)"
+                        keyShuRu = u"4路HDMI输入板卡(2U)"
+                        keyShuChu = u"8路HDMI输出板卡(2U)"
+                    elif keyU == "3U":
+                        key = u"视频拼接处理服务器(3U)"
+                        keyShuRu = u"8路HDMI输入板卡(3U)"
+                        keyShuChu = u"8路HDMI输出板卡(3U)"
+                    r["PINGKONG-SHURU_SHULIANG"] = 1 # 写死了1张
+                    tmp_zongjiage += detailDict[key]["PINGKONG_DANJIA"]*1 + detailDict[keyShuRu]["PINGKONG-SHURU_DANJIA"]*r["PINGKONG-SHURU_SHULIANG"] + detailDict[keyShuChu]["PINGKONG-SHUCHU_DANJIA"]*kou8_shuliang
+                    if tmp_zongjiage < zongjiage or zongjiage == 0:
+                        r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_JIAGE"],r["JIESHOUKA_XINGHAO"],r["JIESHOUKA_DAIZAI_CHANGGAO"]=jieshouka_chang,jieshouka_gao,jieshouka_jiage,jieshouka_xinghao,jieshouka_daizai_changgao
+                        zongjiage = tmp_zongjiage
+                        # 发送组网信息写入：预留
+                        r["FASONGKAZUWANG_LIST"] = fasongzuwang_list
+                        # 写入带载网口数量
+                        r['FASONGWANGKOU_SHULIANG'] = tmp_wangkou_shuliang
+                        # 写入接收卡参数
+                        r["JIESHOUKA_SHULIANG"]=r["JIESHOUKA_CHANG"]*r["JIESHOUKA_GAO"]
+                        for i in keyDict[jieshouka]:
+                            if r["JIESHOUKA_XINGHAO"]  == detailDict[i][jieshouka+"_XINGHAO"]:
+                                for j in tihuanList:
+                                    if "CANSHU" in j:
+                                        tail = "CANSHU"
+                                    else:
+                                        tail = j                     
+                                    r["JIESHOUKA_"+tail] = detailDict[i][jieshouka+"_"+j]
+                        # 发送卡信息写入
+                        r["LEDCHULIQI_SHULIANG"] = shuliang
+                        for i in tihuanList:
+                            if "CANSHU" in i:
+                                tail = "CANSHU"
+                            else:
+                                tail = i
+                            r["LEDCHULIQI_"+tail] = detailDict[key_fasongka][fasongka+"_"+i]
+                         
+                        # 拼控信息写入
+                        r["PINGKONG-SHURU_SHULIANG"] = 1
+                        r["PINGKONG-SHUCHU_SHULIANG"] = kou8_shuliang
+                        for i in tihuanList:
+                            if "CANSHU" in i:
+                                tail = "CANSHU"
+                            else:
+                                tail = i
+                            r["PINGKONG_"+tail] = detailDict[key]["PINGKONG_"+i]
+                            r["PINGKONG-SHURU_"+tail] = detailDict[keyShuRu]["PINGKONG-SHURU_"+i]
+                            r["PINGKONG-SHUCHU_"+tail] = detailDict[keyShuChu]["PINGKONG-SHUCHU_"+i]
+                
         else:
+            # 箱体的方案
             danyuan_FBL = [r["MOZU_FENBIANLV_CHANG"],r["MOZU_FENBIANLV_GAO"]]
             danyuan_CG = [r["BANZI_CHANG"],r["BANZI_GAO"]]
-        r['FASONGWANGKOU_SHULIANG'] = calc.calcFaSongWangKou(danyuan_FBL, danyuan_CG)
+            r['FASONGWANGKOU_SHULIANG'] = calc.calcFaSongWangKou(danyuan_FBL, danyuan_CG)
+            key = calc.calcChuLiQi(chuliqi,keyDict[chuliqi],detailDict,r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"],r['FASONGWANGKOU_SHULIANG'])
             
-        key = calc.calcChuLiQi(chuliqi,keyDict[chuliqi],detailDict,r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"],r['FASONGWANGKOU_SHULIANG'])
-        if key:  # 如果处理器能带的动
-            r["LEDCHULIQI_SHULIANG"] = 1
-            for i in tihuanList:
-                if "CANSHU" in i:
-                    tail = "CANSHU"
-                else:
-                    tail = i
-                r["LEDCHULIQI_"+tail] = detailDict[key][chuliqi+"_"+i]
-        else:
-            # key为空，就是处理器超载了，需要计算发送卡
-            if itemDict['SHOUFALEIBIE'].get() == 0:
-                fasongka = "FASONGKA-LC"
-            elif itemDict['SHOUFALEIBIE'].get() == 1:
-                fasongka = "FASONGKA-LN"
-            elif itemDict['SHOUFALEIBIE'].get() == 2:
-                fasongka = "FASONGKA-KSD"
-            #key, shuliang = calc.calcFaSongKa1(fasongka,keyDict[fasongka],detailDict,r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"])
-            key,shuliang,r["FASONGKAZUWANG_LIST"] = calc.calcFaSongKa(fasongka,keyDict[fasongka],detailDict,danyuan_FBL,danyuan_CG)    
-            r["LEDCHULIQI_SHULIANG"] = shuliang
-            for i in tihuanList:
-                if "CANSHU" in i:
-                    tail = "CANSHU"
-                else:
-                    tail = i
-                r["LEDCHULIQI_"+tail] = detailDict[key][fasongka+"_"+i]
-            # 切换为 LED及拼控 的sheet & 计算拼控
-            if LEDLEIBIE == "SHINEILED":
-                sheetName = u"LED及拼控"
-            elif LEDLEIBIE == "XIANGTILED":
-                sheetName = u"LED箱体及拼控"
-            keyU, kou8_shuliang = calc.calcPingKong(shuliang)
+            if key:  # 如果处理器能带的动
+                # 写入处理器的参数
+                r["LEDCHULIQI_SHULIANG"] = 1
+                for i in tihuanList:
+                    if "CANSHU" in i:
+                        tail = "CANSHU"
+                    else:
+                        tail = i                        
+                    r["LEDCHULIQI_"+tail] = detailDict[key][chuliqi+"_"+i]        
+            else: # key为空，就是处理器超载了，需要计算发送卡，处理器+接收卡的总价不参与与拼控进行价格对比                
+                if itemDict['SHOUFALEIBIE'].get() == 0:
+                    fasongka = "FASONGKA-LC"
+                elif itemDict['SHOUFALEIBIE'].get() == 1:
+                    fasongka = "FASONGKA-LN"
+                elif itemDict['SHOUFALEIBIE'].get() == 2:
+                    fasongka = "FASONGKA-KSD"
+                #key, shuliang = calc.calcFaSongKa1(fasongka,keyDict[fasongka],detailDict,r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"])
+                key,shuliang,r["FASONGKAZUWANG_LIST"] = calc.calcFaSongKa(fasongka,keyDict[fasongka],detailDict,danyuan_FBL,danyuan_CG)    
+                r["LEDCHULIQI_SHULIANG"] = shuliang
+                for i in tihuanList:
+                    if "CANSHU" in i:
+                        tail = "CANSHU"
+                    else:
+                        tail = i
+                    r["LEDCHULIQI_"+tail] = detailDict[key][fasongka+"_"+i]
+                # 切换为 LED及拼控 的sheet & 计算拼控
+                if LEDLEIBIE == "SHINEILED":
+                    sheetName = u"LED及拼控"
+                elif LEDLEIBIE == "XIANGTILED":
+                    sheetName = u"LED箱体及拼控"
+                keyU, kou8_shuliang = calc.calcPingKong(shuliang)
 
-            r["PINGKONG-SHURU_SHULIANG"] = 1
-            r["PINGKONG-SHUCHU_SHULIANG"] = kou8_shuliang
-            
-            if keyU == "2U":
-                key = u"视频拼接处理服务器(2U)"
-                keyShuRu = u"4路HDMI输入板卡(2U)"
-                keyShuChu = u"8路HDMI输出板卡(2U)"
-            elif keyU == "3U":
-                key = u"视频拼接处理服务器(3U)"
-                keyShuRu = u"8路HDMI输入板卡(3U)"
-                keyShuChu = u"8路HDMI输出板卡(3U)"
-            for i in tihuanList:
-                if "CANSHU" in i:
-                    tail = "CANSHU"
-                else:
-                    tail = i
-                r["PINGKONG_"+tail] = detailDict[key]["PINGKONG_"+i]
-                r["PINGKONG-SHURU_"+tail] = detailDict[keyShuRu]["PINGKONG-SHURU_"+i]
-                r["PINGKONG-SHUCHU_"+tail] = detailDict[keyShuChu]["PINGKONG-SHUCHU_"+i]
-        #print(r)
+                r["PINGKONG-SHURU_SHULIANG"] = 1
+                r["PINGKONG-SHUCHU_SHULIANG"] = kou8_shuliang
+                
+                if keyU == "2U":
+                    key = u"视频拼接处理服务器(2U)"
+                    keyShuRu = u"4路HDMI输入板卡(2U)"
+                    keyShuChu = u"8路HDMI输出板卡(2U)"
+                elif keyU == "3U":
+                    key = u"视频拼接处理服务器(3U)"
+                    keyShuRu = u"8路HDMI输入板卡(3U)"
+                    keyShuChu = u"8路HDMI输出板卡(3U)"
+                    
+                for i in tihuanList:
+                    if "CANSHU" in i:
+                        tail = "CANSHU"
+                    else:
+                        tail = i
+                    r["PINGKONG_"+tail] = detailDict[key]["PINGKONG_"+i]
+                    r["PINGKONG-SHURU_"+tail] = detailDict[keyShuRu]["PINGKONG-SHURU_"+i]
+                    r["PINGKONG-SHUCHU_"+tail] = detailDict[keyShuChu]["PINGKONG-SHUCHU_"+i]
+        
         
         # 计算配电箱
-        key, r["PEIDIANXIANG_JIAGE"] = calc.calcPeiDianXiang(keyDict["PEIDIANXIANG"],detailDict,r["PINGMUZONGGONGLV"])
-        # print(key,r["PEIDIANXIANG_JIAGE"],r["PINGMUZONGGONGLV"])
+        key = calc.calcPeiDianXiang(keyDict["PEIDIANXIANG"],detailDict,r["PINGMUZONGGONGLV"])
+        
         if not key:
             key="PEIDIANXIANG_ELSE"
         for i in tihuanList:
@@ -206,7 +302,9 @@ def main():
         tmpList.append(u"总分辨率: %d * %d = %d 像素"%(r["FENBIANLV_CHANG"],r["FENBIANLV_GAO"],r["FENBIANLV_CHANG"]*r["FENBIANLV_GAO"]))
         tmpList.append(u"单元宽高: %s * %s "%(str(r["BANZI_CHANG"]),str(r["BANZI_GAO"])))
         tmpList.append(u"带载网口数: %d"%(r['FASONGWANGKOU_SHULIANG']))
-        tmpList.append(u"%s: %d * %d = %d 张"%(r["JIESHOUKA_MINGCHENG"],r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_SHULIANG"]))
+        if LEDLEIBIE != "XIANGTILED":
+            tmpList.append(u"%s: %d * %d = %d 张"%(r["JIESHOUKA_MINGCHENG"],r["JIESHOUKA_CHANG"],r["JIESHOUKA_GAO"],r["JIESHOUKA_SHULIANG"]))
+            tmpList.append(u"单张接收卡带载模组（宽x高）: %d x %d" % r["JIESHOUKA_DAIZAI_CHANGGAO"])
         tmpList.append(u"发送数量：%s"%r["LEDCHULIQI_SHULIANG"])
         
         tmpList.append(u"电源数量: %d 个"%r["DIANYUAN_SHULIANG"])

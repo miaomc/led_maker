@@ -25,7 +25,7 @@ def calcFengBianLv(banzi_chang, banzi_gao, fenbianlv):
     return banzi_chang*fenbianlv[0], banzi_gao*fenbianlv[1]
 
 
-def calcJieShouKa(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
+def calcJieShouKa_List(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
     """
     INPUT:
     12 12
@@ -37,28 +37,25 @@ def calcJieShouKa(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict):
     'SHINEILED_LN-DH7512-S': '[1,8],[2,4]', 'SHINEILED_LN-DH7516-S': None}
     """
     #print(banzi_chang,banzi_gao,JieShouKaList,ITEM,ledDict)
-    zuizhong_xinghao=''
-    zuizhong_chang=0
-    zuizhong_gao=0
-    zuizhong_jiage=0
-    zuizhong_l=[]
+    #zuizhong_xinghao=''
+    #zuizhong_chang=0
+    #zuizhong_gao=0
+    #zuizhong_jiage=0
+    #zuizhong_l=[]
+    r_list = []
     for i0 in JieShouKaList:
         #print(i0)
         i = i0[0]
         if ledDict[ITEM+'_'+i]:
-            l0 = json.loads('['+ledDict[ITEM+'_'+i]+']') # l =[[2,4],[1,8]]
+            l0 = json.loads('['+ledDict[ITEM+'_'+i]+']') # l0 =[[2,4],[1,8]]
             for l in l0:
                 jieshou_chang = roundup(banzi_chang / l[0])
                 jieshou_gao = roundup(banzi_gao / l[1])
                 jiage = jieshou_chang*jieshou_gao*i0[1]
-                if jiage<zuizhong_jiage or zuizhong_jiage == 0:
-                    zuizhong_chang = jieshou_chang
-                    zuizhong_gao = jieshou_gao
-                    zuizhong_jiage = jiage
-                    zuizhong_xinghao = i0[0]
-                    zuizhong_l = (roundup(banzi_chang/jieshou_chang), roundup(banzi_gao/jieshou_gao))
-
-    return zuizhong_chang,zuizhong_gao,zuizhong_jiage,zuizhong_xinghao,zuizhong_l
+                #print(jieshou_chang,jieshou_gao,jiage,i,(roundup(banzi_chang/jieshou_chang), roundup(banzi_gao/jieshou_gao)))
+                r_list.append( (jieshou_chang,jieshou_gao,jiage,i,(roundup(banzi_chang/jieshou_chang), roundup(banzi_gao/jieshou_gao))) )
+                
+    return r_list
 
 
 def calcChuLiQi(chuliqi,keyList,detailDict,fenbianlv_chang,fenbianlv_gao,wangkou_shuliang):
@@ -167,7 +164,7 @@ def calcPeiDianXiang(keyList,detailDict,gonglv):
             zuizhong_jiage = detailDict[i]["PEIDIANXIANG_DANJIA"]
             
 
-    return zuizhong_key,zuizhong_jiage
+    return zuizhong_key
 
 
 def calcDianYuan(banzi_chang, banzi_gao):
